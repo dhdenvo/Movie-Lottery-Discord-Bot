@@ -120,6 +120,9 @@ class MovieLotteryClient(discord.Client):
                 # If the username contains the word, remove it from the list
                 if user in str(lst_user):
                     lst.pop(lst_user)
+                    # Notify the user & the server that their movie was removed
+                    await message.channel.send("I have removed " + str(lst_user) + "'s movie from your movie lottery")
+                    print('Removing "' + str(lst_user) + '"s from the movie lottery list of', message.guild)                    
     
     async def change_channel(self, message):
         '''
@@ -135,6 +138,9 @@ class MovieLotteryClient(discord.Client):
         channels[message.guild] = channel_name[1].strip().split(" ")
         # Save the channels dictionary to a file
         await self.save_info(self.channels, "channels.json")
+        # Notify the user & the server that their bot channel was changed
+        await message.channel.send("I have changed your bot channel for your movie lottery list")
+        print('Changing ', message.guild, "'s bot channel to", channels[message.guild])         
     
     # The list of functions that are callable through commands     
     funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie, "remove": remove_movie}
