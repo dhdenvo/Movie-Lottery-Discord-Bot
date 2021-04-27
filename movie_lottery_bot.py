@@ -2,6 +2,7 @@ import os
 import discord
 from dotenv import load_dotenv
 import random
+import json
 
 class MovieLotteryClient(discord.Client):
     # The channel that the bot reads in
@@ -11,6 +12,24 @@ class MovieLotteryClient(discord.Client):
     # Brenda's username (used for special cases)
     brenda_username = "Bmanpereira#8054"
     lottery_lst = {}
+    
+    async def save_info(self, info, filename):
+        '''
+        Save some info about the discord bot in a json format
+        '''
+        data = json.dumps(info)
+        f = open("Bot Info/" + filename, "w")
+        f.write(data)
+        f.close()
+        
+    async def load_info(self, info, filename):
+        '''
+        Load some info about the discord bot in a json format
+        '''        
+        f = open("Bot Info/" + filename, "w")
+        data = f.read()
+        f.close() 
+        info = json.loads(data)
     
     async def add_to_lst(self, message):
         '''
@@ -113,6 +132,7 @@ class MovieLotteryClient(discord.Client):
         # Save the channel to the channels dictionary
         channels[message.guild] = channel_name[1].strip().split(" ")
         # Save the channels dictionary to a file
+        await self.save_info(self.channels, "channels.json")
     
     # The list of functions that are callable through commands     
     funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie, "remove": remove_movie}
@@ -123,6 +143,7 @@ class MovieLotteryClient(discord.Client):
         '''
         Tell the server when the bot has connected to discord
         '''
+        await self.load_info(channels, "channels.json")
         print(f"{self.user} has connected to Discord!")
     
     async def __check_command(self, message, command_lst):
