@@ -169,14 +169,14 @@ class MovieLotteryClient(discord.Client):
             return
 
         # Check for the server side commands
-        func = self.__check_command(message, self.server_funcs_check)
+        func = await self.__check_command(message, self.server_funcs_check)
         if func != None:
             await func(self, message)
             return
 
         # Ignore messages that aren't in the bot's channel
         if str(message.channel) == self.channels.get(message.guild, "bots"):
-            func = self.__check_command(message, self.funcs_check)            
+            func = await self.__check_command(message, self.funcs_check)            
             if func != None:
                 await func(self, message)
             return
