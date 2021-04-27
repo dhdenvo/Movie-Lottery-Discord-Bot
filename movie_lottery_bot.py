@@ -5,7 +5,7 @@ import random
 
 class MovieLotteryClient(discord.Client):
     # The channel that the bot reads in
-    channel = "bots"
+    channels = {}
     # The discord bot's username
     bot_username = "Eiga Niijima#3932"
     # Brenda's username (used for special cases)
@@ -100,14 +100,42 @@ class MovieLotteryClient(discord.Client):
                 if user in str(lst_user):
                     lst.pop(lst_user)
     
+    async def change_channel(self, message):
+        '''
+        Change the channel for the specific server
+        '''
+        # Split up the message by the words before "change channel" and the movie
+        channel_name = message.content.lower().strip().split("change channel")
+        # If there is nothing after the phrase "change channel" then its not a valid channel
+        if len(channel_name) < 2:
+            await message.channel.send("Sorry, that doesn't look like a channel name")
+            return
+        # Save the channel to the channels dictionary
+        channels[message.guild] = channel_name[1].strip().split(" ")
+        # Save the channels dictionary to a file
+    
     # The list of functions that are callable through commands     
     funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie, "remove": remove_movie}
+    # The list of functions that are callable through server wide commands (does not matter what channel is called)
+    server_funcs_check = {"change channel": change_channel}
     
     async def on_ready(self):
         '''
         Tell the server when the bot has connected to discord
         '''
         print(f"{self.user} has connected to Discord!")
+    
+    async def __check_command(self, message, command_lst):
+        '''
+        Check and return the function that is being called through the command
+        '''
+        # Check if in the message, it contains a command        
+        func = None
+        for word, rel_func in command_lst.items():
+            if word in message.content:
+                func = rel_func
+                break
+        return func     
     
     async def on_message(self, message):
         '''
@@ -117,18 +145,18 @@ class MovieLotteryClient(discord.Client):
         if str(message.author) == self.bot_username:
             return
 
+        # 
+        func = self.__check_command(message, self.server_funcs_check)
+        if func != None:
+            await func(self, message)
+            return
+
         # Ignore messages that aren't in the bot's channel
-        if str(message.channel) == self.channel:
-            # Check if in the message, it contains a command
-            func = None
-            for word, rel_func in self.funcs_check.items():
-                if word in message.content:
-                    func = rel_func
-                    break
-                
-            # Call the command's associated function if there is one
+        if str(message.channel) == self.channels.get(message.guild, "bots"):
+            func = self.__check_command(message, self.funcs_check)            
             if func != None:
                 await func(self, message)
+            return
                 
         
 if __name__ == "__main__":
