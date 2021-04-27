@@ -26,10 +26,12 @@ class MovieLotteryClient(discord.Client):
         '''
         Load some info about the discord bot in a json format
         '''        
-        f = open("Bot Info/" + filename, "w")
+        f = open("Bot Info/" + filename, "r")
         data = f.read()
-        f.close() 
-        info = json.loads(data)
+        f.close()
+        # If the file is empty, then ignore
+        if data != '':
+            info = json.loads(data)
     
     async def add_to_lst(self, message):
         '''
@@ -110,7 +112,7 @@ class MovieLotteryClient(discord.Client):
             return
 
         # Break up the words after the word remove
-        words = ' '.join(words[1:]).strip().strip(" ")
+        words = ' '.join(words[1:]).strip().split(" ")
 
         # For every username in the list, check if it contains a 'user' (a word that appears after remove)
         for lst_user in lst:
@@ -143,7 +145,7 @@ class MovieLotteryClient(discord.Client):
         '''
         Tell the server when the bot has connected to discord
         '''
-        await self.load_info(channels, "channels.json")
+        await self.load_info(self.channels, "channels.json")
         print(f"{self.user} has connected to Discord!")
     
     async def __check_command(self, message, command_lst):
@@ -166,7 +168,7 @@ class MovieLotteryClient(discord.Client):
         if str(message.author) == self.bot_username:
             return
 
-        # 
+        # Check for the server side commands
         func = self.__check_command(message, self.server_funcs_check)
         if func != None:
             await func(self, message)
