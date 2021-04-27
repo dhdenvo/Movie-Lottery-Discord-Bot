@@ -72,9 +72,36 @@ class MovieLotteryClient(discord.Client):
         ind = random.randint(0, len(lst) - 1)
         movie = list(lst.values())[ind]
         await message.channel.send('The movie that you are watching is "' + movie + '"')
+
+    async def remove_movie(self, message):
+        '''
+        Remove a person's movie from the list
+        '''
+        # Get the list for the specific server
+        lst = self.lottery_lst.get(message.guild, None)
+        if not lst:
+            await message.channel.send("There aren't any movies on your movie lottery list")
+            return
+
+        # Split up the message by the words before "add" and the movie
+        words = message.content.lower().strip().split("remove ")
+        # If there is nothing after the word "remove" then its not a valid username
+        if len(words) < 2:
+            await message.channel.send("Sorry, that doesn't look like a username")
+            return
+
+        # Break up the words after the word remove
+        words = ' '.join(words[1:]).strip().strip(" ")
+
+        # For every username in the list, check if it contains a 'user' (a word that appears after remove)
+        for lst_user in lst:
+            for user in words:
+                # If the username contains the word, remove it from the list
+                if user in str(lst_user):
+                    lst.pop(lst_user)
     
     # The list of functions that are callable through commands     
-    funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie}
+    funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie, "remove": remove_movie}
     
     async def on_ready(self):
         '''
