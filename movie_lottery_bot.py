@@ -31,7 +31,9 @@ class MovieLotteryClient(discord.Client):
         f.close()
         # If the file is empty, then ignore
         if data != '':
-            info = json.loads(data)
+            data = json.loads(data)
+            for key, val in data.items():
+                info[key] = val
     
     async def add_to_lst(self, message):
         '''
@@ -135,12 +137,12 @@ class MovieLotteryClient(discord.Client):
             await message.channel.send("Sorry, that doesn't look like a channel name")
             return
         # Save the channel to the channels dictionary
-        self.channels[message.guild.id] = channel_name[1].strip().split(" ")[0]
+        self.channels[str(message.guild.id)] = channel_name[1].strip().split(" ")[0]
         # Save the channels dictionary to a file
         await self.save_info(self.channels, "channels.json")
         # Notify the user & the server that their bot channel was changed
         await message.channel.send("I have changed your bot channel for your movie lottery list")
-        print('Changing ' + str(message.guild) + "'s bot channel to", self.channels[message.guild.id])         
+        print('Changing ' + str(message.guild) + "'s bot channel to", self.channels[str(message.guild.id)])         
     
     # The list of functions that are callable through commands     
     funcs_check = {"add": add_to_lst, "list": get_lst, "reset": reset_lst, "pick": pick_movie, "remove": remove_movie}
@@ -181,7 +183,7 @@ class MovieLotteryClient(discord.Client):
             return
 
         # Ignore messages that aren't in the bot's channel
-        if str(message.channel) == self.channels.get(message.guild.id, "bots"):
+        if str(message.channel) == self.channels.get(str(message.guild.id), "bots"):
             func = await self.__check_command(message, self.funcs_check)            
             if func != None:
                 await func(self, message)
