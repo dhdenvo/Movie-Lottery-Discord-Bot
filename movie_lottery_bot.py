@@ -161,12 +161,10 @@ class MovieLotteryClient(discord.Client):
         Check and return the function that is being called through the command
         '''
         # Check if in the message, it contains a command        
-        func = None
         for word, rel_func in command_lst.items():
-            if word in message.content:
-                func = rel_func
-                break
-        return func     
+            if word in message.content.lower():
+                return rel_func
+        return None     
     
     async def on_message(self, message):
         '''
